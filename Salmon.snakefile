@@ -6,14 +6,14 @@ species = { sample[:-1] for sample in samples }
 
 rule all:
      input:
-	  expand ( '{spec}.salmon.index', spec=species ),
-	  expand ( '{sample}.salmon.quants', sample = samples )
+	  expand ( '{species}.salmon.index', species=species ),
+	  expand ( '{sample}.salmon.quants', sample = samples ),
+	  expand ( '{species}.all.genes.counts', species=species )
 
 rule index:
       input: "{species}.fasta"
       output: directory("{species}.salmon.index")
       shell: """ salmon index -t {input} -i {output} --keepDuplicates """
-      
 
 rule selective_alignment:
       input:  "{samples}_1.trimmed.fastq.gz", "{samples}_2.trimmed.fastq.gz"
