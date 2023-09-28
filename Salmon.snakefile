@@ -1,7 +1,7 @@
 import os
 import re
 
-samples = { samples[:-19] for samples in os.listdir (".") if samples.endswith(".fastq.gz") }
+samples = { samples[:-19] for samples in os.listdir (".") if samples.endswith("trimmed.fastq.gz") }
 species = { sample[:-1] for sample in samples }
 
 rule all:
