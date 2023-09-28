@@ -24,6 +24,6 @@ rule selective_alignment:
 
 rule quantmerge:
      input: expand ( "{sample}.salmon.quants/quant.sf", sample = samples )
-     output:  "{params.prefix}.all.genes.counts"
+     output:  "{params.species}.all.genes.counts"
      params: species = lambda wildcards: wildcards.samples[:-1]
-     shell: """ salmon quantmerge --quants {input} --column numreads --output {params.species}.all.genes.counts && {output} """
+     shell: """ salmon quantmerge --quants {input} --column numreads --output {output}"""
