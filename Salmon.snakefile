@@ -21,7 +21,6 @@ rule selective_alignment:
       params: species = lambda wildcards: wildcards.samples[:-1]
       shell: """ salmon quant -i {params.species}.salmon.index -l A -1 {input[0]} -2 {input[1]} --threads 20 --validateMappings -o {output} """
 
-
 rule quantmerge:
      input: expand ( "{sample}.salmon.quants/quant.sf", sample = samples )
      output:  "{params.species}.all.genes.counts"
