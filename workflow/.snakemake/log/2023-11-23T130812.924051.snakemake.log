@@ -1,0 +1,4 @@
+NameError in file /home/jason/bin/Qute/workflow/Snakefile, line 7:
+name 'results' is not defined
+  File "/home/jason/bin/Qute/workflow/Snakefile", line 10, in <module>
+  File "/home/jason/bin/Qute/workflow/Snakefile", line 7, in find_workflow_path

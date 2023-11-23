@@ -1,0 +1,3 @@
+KeyError in file /home/jason/bin/Qute/workflow/Snakefile, line 33:
+'mapping_threads'
+  File "/home/jason/bin/Qute/workflow/Snakefile", line 33, in <module>

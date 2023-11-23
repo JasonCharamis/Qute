@@ -1,0 +1,3 @@
+WorkflowError in file /home/jason/bin/Qute/workflow/Snakefile, line 10:
+Workflow defines configfile /home/jason/bin/Qute/home/jason/.cache/snakemake/snakemake/source-cache/runtime-cache/tmpy5j9j66g/file/home/jason/bin/Qute/config/config.yaml but it is not present or accessible (full checked path: /home/jason/bin/Qute/home/jason/.cache/snakemake/snakemake/source-cache/runtime-cache/tmpy5j9j66g/file/home/jason/bin/Qute/config/config.yaml).
+  File "/home/jason/bin/Qute/workflow/Snakefile", line 10, in <module>
