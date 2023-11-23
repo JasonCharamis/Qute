@@ -16,7 +16,6 @@ RUN apt-get update &&\
 
 # Conda environment:
 #   source: envs/salmon.yaml
-#   prefix: /conda-envs/e7731bb49f40c7aec2d59fb33378cd57
 #   name: salmon
 #   channels:
 #       - bioconda
