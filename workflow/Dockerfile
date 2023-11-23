@@ -10,7 +10,7 @@ RUN apt-get update &&\
     apt-get install -f -y &&\
     apt-get install build-essential -y &&\
     apt-get install git -y &&\
-    apt-get install python3-pip
+    apt-get install python3-pip -y
 
 # Step 2: Retrieve conda environments
 
@@ -30,6 +30,9 @@ RUN conda install -c bioconda salmon
 RUN conda install wheel &&\
     conda install snakemake
 
+RUN git clone https://github.com/JasonCharamis/QuteS.git
+
 ENV PATH="~/.local:$PATH"
+ENV PATH="QuteS:$PATH"
 
 CMD ["Everything installed!"]
