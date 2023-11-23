@@ -1,22 +1,31 @@
 import os, re
 import subprocess
 
+def find_repository_name(start_dir="."):
+    for root, dirs, files in os.walk(start_dir):
+        paths = [path for path in files if re.search("Snakefile|snakefile", path)]
+        if paths:
+            return re.sub(".\/|workflow","", root)
+
 def find_workflow_path():
     home_directory = os.path.expanduser("~")
-    result = subprocess.run(["find", home_directory, "-type", "d", "-name", "Qute"], capture_output=True, text=True)
-    first_hit = result.stdout.splitlines()[0] if result.stdout else None
-    return first_hit
+    repository_name = find_repository_name(start_dir="~")
+    result = subprocess.run(["find", home_directory, "-type", "d", "-name", repository_name ], capture_output=True, text=True)
+    return result.stdout
+
+print ( find_workflow_path() )
 
 configfile: re.sub("\s+","", str(find_workflow_path())+"/config/config.yaml")
 
-samples = { samples[:-19] for samples in os.listdir (".") if samples.endswith("trimmed.fastq.gz") }
+samples = { samples[:-10] for samples in os.listdir (".") if samples.endswith(".fastq.gz") }
 species = { sample[:-1] for sample in samples }
 
 rule all:
     input:
         expand ( '{species}.salmon.index', species=species ),
-	expand ( '{sample}.salmon.quants', sample = samples ),
-	expand ( '{species}.all.genes.counts', species=species )
+	expand ( '{sample}.salmon.quants', sample=samples ),
+	expand ( '{species}.all.genes.counts', species=species ),
+	"PCA.svg"
 
 rule index:
       input: "{species}.fasta"
@@ -42,9 +51,20 @@ rule selective_alignment:
 
 rule quantmerge:
      input: expand ( "{sample}.salmon.quants/quant.sf", sample = samples )
-     output:  "{params.species}.all.genes.counts"
+     output: expand("{species}.all.genes.counts", species = {params.species} )
      conda: "envs/salmon.yaml"
      params: species = lambda wildcards: wildcards.samples[:-1]
      shell: """ salmon quantmerge --quants {input} 
      	    	       		  --column numreads 
 				  --output {output} """
+
+rule PCA: 
+     input: expand("{species}.all.genes.counts", species = {params.species} )
+     output:  pca="PCA.svg"
+     params: species = lambda wildcards: wildcards.samples[:-1]
+     shell: """ ls -1 {params.species}.all.genes.counts > quant_list &&\
+     
+     	    	python3 concatenate_counts.py --quants quant_list
+					      --out concatenated_counts.tsv &&\
+					      
+		Rscript pca.R concatenated_counts.tsv """
