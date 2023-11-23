@@ -1,0 +1,4 @@
+TypeError in line 6 of /home/jason/bin/Qute/workflow/Snakefile:
+'str' object is not callable
+  File "/home/jason/bin/Qute/workflow/Snakefile", line 8, in <module>
+  File "/home/jason/bin/Qute/workflow/Snakefile", line 6, in find_workflow_path

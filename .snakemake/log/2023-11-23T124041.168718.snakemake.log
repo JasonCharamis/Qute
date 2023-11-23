@@ -1,0 +1,2 @@
+SyntaxError in line 9 of /home/jason/bin/Qute/workflow/Snakefile:
+Unexpected keyword expand in rule definition (Snakefile, line 9)

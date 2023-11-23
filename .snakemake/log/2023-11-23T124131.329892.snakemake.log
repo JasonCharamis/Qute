@@ -1,0 +1,2 @@
+SyntaxError in line 24 of /home/jason/bin/Qute/workflow/Snakefile:
+Unexpected keyword species in rule definition (Snakefile, line 24)
