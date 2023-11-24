@@ -19,10 +19,10 @@ RUN apt-get update && \
         libxml2-dev \
         git \
         python3-pip \
-        curl
+	wget
 
 # Install Miniconda
-RUN curl --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/miniconda.sh && \
+RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/miniconda.sh && \
     /bin/bash /tmp/miniconda.sh -b -p /opt/conda && \
     rm /tmp/miniconda.sh
 
