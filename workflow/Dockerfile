@@ -4,7 +4,7 @@ LABEL io.github.snakemake.conda_env_hash="e3b0c44298fc1c149afbf4c8996fb92427ae41
 
 ## Dockerfile to build Docker image for this Snakemake workflow.
 
-FROM r-base:latest
+#FROM r-base:latest
 
 ENV DEBIAN_FRONTEND noninteractive
 WORKDIR /home
