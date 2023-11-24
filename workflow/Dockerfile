@@ -19,7 +19,6 @@ RUN apt-get install -yq --no-install-recommends \
 RUN apt-get update && \
     apt-get install -y apt-utils && \
     apt-get install -yq \
-        build-essential \
         libcurl4-openssl-dev \
         libssl-dev \
         libxml2-dev \
