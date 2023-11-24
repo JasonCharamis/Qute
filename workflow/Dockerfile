@@ -4,15 +4,19 @@ LABEL io.github.snakemake.conda_env_hash="e3b0c44298fc1c149afbf4c8996fb92427ae41
 
 ## Dockerfile to build Docker image for this Snakemake workflow.
 
-# Step 1: Install the essentials
+FROM r-base:latest
 
+# Step 1: Install the essentials
 RUN apt-get update &&\
-    apt-get install apt-utils -y &&\
-    apt-get install -f -y &&\
-    apt-get install build-essential -y &&\
-    apt-get install git -y &&\
-    apt-get install python3-pip -y &&\
-    apt-get install curl -y
+    apt-get install -y apt-utils \
+		       build-essential\
+		       libcurl4-openssl-dev \
+    	    	       libssl-dev \
+		       libxml2-dev \
+		       git \
+		       python3-pip \
+		       curl \
+		       -f
 
 # Step 2: Retrieve conda environments
 
@@ -25,14 +29,6 @@ RUN apt-get update &&\
 #       - salmon
 
 RUN conda install -c bioconda salmon
-
-WORKDIR /usr/local/lib/
-RUN wget https://ftp.cc.uoc.gr/mirrors/CRAN/src/base/R-3/R-3.6.0.tar.gz
-RUN tar -xf R-3.6.0.tar.gz
-WORKDIR /usr/local/lib/R-3.6.0
-RUN ./configure &&\
-    make &&\
-    make install
 
 # Install required R packages
 RUN Rscript -e 'install.packages("dplyr", repos="https://cran.rstudio.com")' &&\
