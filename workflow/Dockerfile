@@ -9,7 +9,7 @@ FROM r-base:latest
 # Step 1: Install the essentials
 RUN apt-get update &&\
     apt-get install -y apt-utils \
-		       build-essential\
+		       build-essential \
 		       libcurl4-openssl-dev \
     	    	       libssl-dev \
 		       libxml2-dev \
