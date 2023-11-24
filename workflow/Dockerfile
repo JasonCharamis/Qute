@@ -21,6 +21,15 @@ RUN apt-get update && \
         python3-pip \
         curl
 
+# Install Miniconda
+RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/miniconda.sh && \
+    /bin/bash /tmp/miniconda.sh -b -p /opt/conda && \
+    rm /tmp/miniconda.sh
+
+# Set conda on the PATH
+ENV PATH /opt/conda/bin:$PATH
+RUN conda init --all
+
 # Step 2: Install R without prompts
 RUN apt-get install -y --no-install-recommends \
         r-base \
