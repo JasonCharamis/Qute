@@ -10,10 +10,9 @@ def open_count_files(input_file, delimiter="\t"):
 
         for line in lines:
             key, values = line.strip().split(delimiter, 1)
-            counts[key] = values
+            counts[key] = values.split('\t')[4] ## NumReads is the fifth and last column of quant.sf (Salmon output)
 
     return counts
-
 
 def merge_counts(input_list):
     dictionaries = []

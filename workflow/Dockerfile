@@ -11,8 +11,8 @@ RUN apt-get update &&\
     apt-get install build-essential -y &&\
     apt-get install git -y &&\
     apt-get install python3-pip -y &&\
-    apt-get install r-base-core -y
-
+    apt-get install curl -y
+    
 # Step 2: Retrieve conda environments
 
 # Conda environment:
@@ -37,7 +37,11 @@ RUN Rscript -e 'install.packages("dplyr", repos="https://cran.rstudio.com")' &&\
     Rscript -e 'install.packages("ggrepel", repos="https://cran.rstudio.com")' && \
     Rscript -e 'install.packages("stringi", repos="https://cran.rstudio.com")' && \
     Rscript -e 'install.packages("tidyverse", repos="https://cran.rstudio.com")' && \
-    Rscript -e 'install.packages("ggplot2", repos="https://cran.rstudio.com")'
+    Rscript -e 'install.packages("ggplot2", repos="https://cran.rstudio.com")' &&\
+    Rscript -e 'install.packages("limma", repos="https://cran.rstudio.com")' &&\
+    Rscript -e 'install.packages("voom", repos="https://cran.rstudio.com")' &&\
+    Rscript -e 'install.packages("edgeR", repos="https://cran.rstudio.com")'
+    
 
 # Step 3: Install and test Snakemake
 
@@ -45,6 +49,11 @@ RUN conda install wheel &&\
     conda install snakemake
 
 RUN git clone https://github.com/JasonCharamis/QuteS.git
+
+RUN curl -O -L https://raw.githubusercontent.com/trinityrnaseq/trinityrnaseq/master/Analysis/DifferentialExpression/run_DE_analysis.pl \
+    curl -O -L https://raw.githubusercontent.com/trinityrnaseq/trinityrnaseq/master/Analysis/DifferentialExpression/analyze_diff_expr.pl
+
+RUN mv *.pl QuteS/workflow/scripts
 
 ENV PATH="~/.local:$PATH"
 ENV PATH="QuteS:$PATH"
