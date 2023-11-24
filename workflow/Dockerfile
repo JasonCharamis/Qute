@@ -4,35 +4,17 @@ LABEL io.github.snakemake.conda_env_hash="e3b0c44298fc1c149afbf4c8996fb92427ae41
 
 ## Dockerfile to build Docker image for this Snakemake workflow.
 
-# Use a Debian base image
-FROM debian:bullseye-slim
-
-# Add GPG keys for Debian repositories
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    gnupg \
-    dirmngr \
-    && apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 0E98404D386FA1D9 6ED0E7B82643E131 54404762BBB6E853 BDE6D2B9216EC7A8 \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
-
-# Set the Debian release in sources.list
-RUN echo "deb http://deb.debian.org/debian buster main" > /etc/apt/sources.list
-
-# Step 1: Install essential dependencies
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-        build-essential \
-        libcurl4-openssl-dev \
-        libssl-dev \
-        libxml2-dev \
-        git \
-        python3-pip \
-        curl
-
-# Step 2: Install R
-RUN apt-get install -y --no-install-recommends \
-        r-base \
-        r-base-dev
+# Get general software; bzip is required to install R 
+RUN apt-get update &&\
+    apt-get install -y software-properties-common &&\
+    apt-get update --fix-missing && \
+    apt-get install -y wget && \
+    apt-get install -y git && \
+    apt-get install -y unzip && \
+    apt-get install -y mlocate && \
+    apt-get install -y libbz2-dev && \
+    apt-get clean &&\
+    rm -rf /var/lib/apt/lists/*
 
 # Step 2: Retrieve conda environments
 
@@ -45,6 +27,7 @@ RUN apt-get install -y --no-install-recommends \
 #       - salmon
 
 RUN conda install -c bioconda salmon
+RUN conda install -c conda-forge r-essentials
 
 # Install required R packages
 RUN Rscript -e 'install.packages("dplyr", repos="https://cran.rstudio.com")' &&\
