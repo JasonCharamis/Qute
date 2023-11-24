@@ -36,6 +36,8 @@ RUN apt-get install -y --no-install-recommends \
         r-base-dev \
         && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
+ENV PATH /usr/lib/R/bin:$PATH
+
 # Step 2: Retrieve conda environments
 
 # Conda environment:
