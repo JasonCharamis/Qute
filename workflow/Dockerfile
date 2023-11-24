@@ -6,19 +6,24 @@ LABEL io.github.snakemake.conda_env_hash="e3b0c44298fc1c149afbf4c8996fb92427ae41
 
 FROM r-base:latest
 
+FROM r-base:latest
+
 # Step 1: Install the essentials
 RUN apt-get update && \
-    apt-get install -y \
-    apt-utils \
-    build-essential \
-    libcurl4-openssl-dev \
-    libssl-dev \
-    libxml2-dev \
-    git \
-    python3-pip \
-    curl
+    apt-get install -y apt-utils && \
+    apt-get install -yq \
+        build-essential \
+        libcurl4-openssl-dev \
+        libssl-dev \
+        libxml2-dev \
+        git \
+        python3-pip \
+        curl
 
-RUN apt-get install -y -f
+RUN apt-get install -yf
+
+# Your additional Dockerfile instructions go here
+# For example, you can install R packages or run other setup tasks
 
 # Step 2: Retrieve conda environments
 
