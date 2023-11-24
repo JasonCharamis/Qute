@@ -62,9 +62,9 @@ rule PCA:
      input: expand("{species}.all.genes.counts", species = {params.species} )
      output:  pca="PCA.svg"
      params: species = lambda wildcards: wildcards.samples[:-1]
-     shell: """ ls -1 {params.species}.all.genes.counts > quant_list &&\
-     
-     	    	python3 concatenate_counts.py --quants quant_list
-					      --out concatenated_counts.tsv &&\
+     shell: """ ls -1 {params.species}.all.genes.counts > count_list &&\
+
+     	    	python3 merge_counts.py --quants count_list \
+					--out merged_counts.tsv &&\
 					      
-		Rscript pca.R concatenated_counts.tsv """
+		Rscript pca.R merged_counts.tsv """
