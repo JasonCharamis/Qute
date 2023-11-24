@@ -4,12 +4,10 @@ LABEL io.github.snakemake.conda_env_hash="e3b0c44298fc1c149afbf4c8996fb92427ae41
 
 ## Dockerfile to build Docker image for this Snakemake workflow.
 
-# Use an official R runtime as a parent image
-FROM r-base:latest
-
 # Step 1: Install the essentials
 
 RUN apt-get update &&\
+    apt-get apt-utils &&\
     apt-get install -f -y &&\
     apt-get install build-essential -y &&\
     apt-get install git -y &&\
@@ -27,6 +25,14 @@ RUN apt-get update &&\
 #       - salmon
 
 RUN conda install -c bioconda salmon
+
+WORKDIR /usr/local/lib/
+RUN wget https://ftp.cc.uoc.gr/mirrors/CRAN/src/base/R-3/R-3.6.0.tar.gz
+RUN tar -xf R-3.6.0.tar.gz
+WORKDIR /usr/local/lib/R-3.6.0
+RUN ./configure &&\
+    make &&\
+    make install
 
 # Install required R packages
 RUN Rscript -e 'install.packages("dplyr", repos="https://cran.rstudio.com")' &&\
@@ -51,7 +57,7 @@ RUN conda install wheel &&\
 
 RUN git clone https://github.com/JasonCharamis/QuteS.git
 
-RUN curl -O -L https://raw.githubusercontent.com/trinityrnaseq/trinityrnaseq/master/Analysis/DifferentialExpression/run_DE_analysis.pl \
+RUN curl -O -L https://raw.githubusercontent.com/trinityrnaseq/trinityrnaseq/master/Analysis/DifferentialExpression/run_DE_analysis.pl &&\
     curl -O -L https://raw.githubusercontent.com/trinityrnaseq/trinityrnaseq/master/Analysis/DifferentialExpression/analyze_diff_expr.pl
 
 RUN mv *.pl QuteS/workflow/scripts
