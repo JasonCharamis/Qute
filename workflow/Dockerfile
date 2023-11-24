@@ -8,15 +8,15 @@ FROM r-base:latest
 
 # Step 1: Install the essentials
 RUN apt-get update && \
-    apt-get install -y apt-utils \
-		       build-essential \
-		       libcurl4-openssl-dev \
-    	    	       libssl-dev \
-		       libxml2-dev \
-		       git \
-		       python3-pip \
-		       curl \
-		       -f
+    apt-get install -y apt-utils &&\
+    apt-get install -y build-essential &&\
+    apt-get install -y libcurl4-openssl-dev &&\
+    apt-get install -y libssl-dev &&\
+    apt-get install -y libxml2-dev &&\
+    apt-get install -y git &&\
+    apt-get install -y python3-pip &&\
+    apt-get install -y curl &&\
+    apt-get install -y -f
 
 # Step 2: Retrieve conda environments
 
