@@ -51,20 +51,14 @@ ENV PATH /usr/lib/R/bin:$PATH
 RUN conda install -c bioconda salmon
 RUN conda install -c conda-forge r-essentials
 
-# Install required R packages
-RUN Rscript -e 'install.packages("dplyr", repos="https://cran.rstudio.com")' &&\
-	       'install.packages("magrittr", repos="https://cran.rstudio.com")' &&\
-	       'install.packages("stringr", repos="https://cran.rstudio.com")' &&\
-	       'install.packages("ggplot2", repos="https://cran.rstudio.com")' && \
-	       'install.packages("ggfortify", repos="https://cran.rstudio.com")' && \
-	       'install.packages("ggthemes", repos="https://cran.rstudio.com")' && \
-	       'install.packages("ggrepel", repos="https://cran.rstudio.com")' && \
-	       'install.packages("stringi", repos="https://cran.rstudio.com")' && \
-	       'install.packages("tidyverse", repos="https://cran.rstudio.com")' && \
-	       'install.packages("ggplot2", repos="https://cran.rstudio.com")' &&\
-	       'install.packages("limma", repos="https://cran.rstudio.com")' &&\
-	       'install.packages("voom", repos="https://cran.rstudio.com")' &&\
-	       'install.packages("edgeR", repos="https://cran.rstudio.com")'
+# Install BiocManager
+RUN R -e 'install.packages("BiocManager", repos="https://cran.rstudio.com")'
+
+# Install required R packages using BiocManager
+RUN R -e 'BiocManager::install(c("limma", "voom", "edgeR"))'
+
+# Install other required R packages from CRAN
+RUN R -e 'install.packages(c("dplyr", "magrittr", "stringr", "ggplot2", "ggfortify", "ggthemes", "ggrepel", "stringi", "tidyverse"), repos="https://cran.rstudio.com")'
 
 # Step 3: Install and test Snakemake
 
