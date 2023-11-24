@@ -4,22 +4,11 @@ LABEL io.github.snakemake.conda_env_hash="e3b0c44298fc1c149afbf4c8996fb92427ae41
 
 ## Dockerfile to build Docker image for this Snakemake workflow.
 FROM ubuntu:20.04
-FROM r-base:latest
 
 # Set environment variables for non-interactive installation
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Europe
 
-# Add GPG keys for Debian repositories
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    gnupg \
-    dirmngr \
-    && apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 0E98404D386FA1D9 6ED0E7B82643E131 54404762BBB6E853 BDE6D2B9216EC7A8 \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
-
-# Set the Debian release in sources.list
-RUN echo "deb http://deb.debian.org/debian buster main" > /etc/apt/sources.list
 
 # Step 1: Install essential dependencies
 RUN apt-get update && \
@@ -37,9 +26,6 @@ RUN apt-get install -y --no-install-recommends \
         r-base \
         r-base-dev \
         && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
-
-# Your additional Dockerfile instructions go here
-# For example, you can install R packages or run other setup tasks
 
 # Step 2: Retrieve conda environments
 

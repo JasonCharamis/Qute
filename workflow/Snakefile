@@ -72,6 +72,7 @@ rule quantmerge:
 rule PCA: 
    input: tpm="all.genes.tpm"
    output: pca="PCA.svg"
+   conda: "envs/salmon.yaml"
    params: species = lambda wildcards: wildcards.samples[:-1]
    shell: """ Rscript pca.R {input.tpm} """
 
