@@ -7,7 +7,7 @@ LABEL io.github.snakemake.conda_env_hash="e3b0c44298fc1c149afbf4c8996fb92427ae41
 # Step 1: Install the essentials
 
 RUN apt-get update &&\
-    apt-get install apt-utils &&\
+    apt-get install apt-utils -y &&\
     apt-get install -f -y &&\
     apt-get install build-essential -y &&\
     apt-get install git -y &&\
