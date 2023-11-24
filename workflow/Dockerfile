@@ -11,9 +11,8 @@ RUN apt-get update &&\
     apt-get install build-essential -y &&\
     apt-get install git -y &&\
     apt-get install python3-pip -y &&\
-    apt-get install r-base-core -y &&\
     apt-get install curl -y
-    
+
 # Step 2: Retrieve conda environments
 
 # Conda environment:
@@ -28,21 +27,24 @@ RUN conda install -c bioconda salmon
 
 # Install R dependencies
 
+# Use an official R runtime as a parent image
+FROM r-base:latest
+
+# Install required R packages
 RUN Rscript -e 'install.packages("dplyr", repos="https://cran.rstudio.com")' &&\
-    Rscript -e 'install.packages("RColorBrewer2", repos="https://cran.rstudio.com")' &&\
-    Rscript -e 'install.packages("magrittr", repos="https://cran.rstudio.com")' &&\
-    Rscript -e 'install.packages("stringr", repos="https://cran.rstudio.com")' &&\
-    Rscript -e 'install.packages("ggplot2", repos="https://cran.rstudio.com")' && \
-    Rscript -e 'install.packages("ggfortify", repos="https://cran.rstudio.com")' && \
-    Rscript -e 'install.packages("ggthemes", repos="https://cran.rstudio.com")' && \
-    Rscript -e 'install.packages("ggrepel", repos="https://cran.rstudio.com")' && \
-    Rscript -e 'install.packages("stringi", repos="https://cran.rstudio.com")' && \
-    Rscript -e 'install.packages("tidyverse", repos="https://cran.rstudio.com")' && \
-    Rscript -e 'install.packages("ggplot2", repos="https://cran.rstudio.com")' &&\
-    Rscript -e 'install.packages("limma", repos="https://cran.rstudio.com")' &&\
-    Rscript -e 'install.packages("voom", repos="https://cran.rstudio.com")' &&\
-    Rscript -e 'install.packages("edgeR", repos="https://cran.rstudio.com")'
-    
+               'install.packages("RColorBrewer2", repos="https://cran.rstudio.com")' &&\
+	       'install.packages("magrittr", repos="https://cran.rstudio.com")' &&\
+	       'install.packages("stringr", repos="https://cran.rstudio.com")' &&\
+	       'install.packages("ggplot2", repos="https://cran.rstudio.com")' && \
+	       'install.packages("ggfortify", repos="https://cran.rstudio.com")' && \
+	       'install.packages("ggthemes", repos="https://cran.rstudio.com")' && \
+	       'install.packages("ggrepel", repos="https://cran.rstudio.com")' && \
+	       'install.packages("stringi", repos="https://cran.rstudio.com")' && \
+	       'install.packages("tidyverse", repos="https://cran.rstudio.com")' && \
+	       'install.packages("ggplot2", repos="https://cran.rstudio.com")' &&\
+	       'install.packages("limma", repos="https://cran.rstudio.com")' &&\
+	       'install.packages("voom", repos="https://cran.rstudio.com")' &&\
+	       'install.packages("edgeR", repos="https://cran.rstudio.com")'
 
 # Step 3: Install and test Snakemake
 
