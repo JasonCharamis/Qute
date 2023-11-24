@@ -29,6 +29,8 @@ RUN conda install -c bioconda salmon
 FROM r-base:latest
 
 ENV R_HOME /usr/lib/R
+ENV PATH "${R_HOME}/bin:${PATH}"
+WORKDIR /usr/src/app
 
 # Install required R packages
 RUN Rscript -e 'install.packages("dplyr", repos="https://cran.rstudio.com")' &&\
