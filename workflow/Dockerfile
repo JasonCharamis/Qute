@@ -4,6 +4,9 @@ LABEL io.github.snakemake.conda_env_hash="e3b0c44298fc1c149afbf4c8996fb92427ae41
 
 ## Dockerfile to build Docker image for this Snakemake workflow.
 
+# Use an official R runtime as a parent image
+FROM r-base:latest
+
 # Step 1: Install the essentials
 
 RUN apt-get update &&\
@@ -24,13 +27,6 @@ RUN apt-get update &&\
 #       - salmon
 
 RUN conda install -c bioconda salmon
-
-# Use an official R runtime as a parent image
-FROM r-base:latest
-
-ENV R_HOME /usr/lib/R
-ENV PATH "${R_HOME}/bin:${PATH}"
-WORKDIR /usr/src/app
 
 # Install required R packages
 RUN Rscript -e 'install.packages("dplyr", repos="https://cran.rstudio.com")' &&\
