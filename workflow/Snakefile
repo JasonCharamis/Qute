@@ -31,8 +31,8 @@ rule index:
       input: "{species}.fasta"
       output: directory("{species}.salmon.index")
       conda: "envs/salmon.yaml"
-      shell: """ salmon index -t {input} 
-      	     	 	      -i {output} 
+      shell: """ salmon index -t {input}  \
+      	     	 	      -i {output}  \
 			      --keepDuplicates """
 
 rule selective_alignment:
@@ -42,11 +42,11 @@ rule selective_alignment:
       params:
           species = lambda wildcards: wildcards.samples[:-1],
 	  threads = config['mapping_threads']
-      shell: """ salmon quant -i {params.species}.salmon.index 
-      	     	 	      -l A 
-			      -1 {input[0]} -2 {input[1]} 
-			      --threads {params.threads} 
-			      --validateMappings 
+      shell: """ salmon quant -i {params.species}.salmon.index  \
+      	     	 	      -l A  \
+			      -1 {input[0]} -2 {input[1]}  \
+			      --threads {params.threads}  \
+			      --validateMappings  \
 			      -o {output} """
 
 rule quantmerge:
@@ -54,17 +54,17 @@ rule quantmerge:
      output: expand("{species}.all.genes.counts", species = {params.species} )
      conda: "envs/salmon.yaml"
      params: species = lambda wildcards: wildcards.samples[:-1]
-     shell: """ salmon quantmerge --quants {input} 
-     	    	       		  --column numreads 
+     shell: """ salmon quantmerge --quants {input}  \ 
+     	    	       		  --column numreads  \
 				  --output {output} """
 
 rule PCA: 
      input: expand("{species}.all.genes.counts", species = {params.species} )
      output:  pca="PCA.svg"
      params: species = lambda wildcards: wildcards.samples[:-1]
-     shell: """ ls -1 {params.species}.all.genes.counts > count_list &&\
+     shell: """ ls -1 {params.species}.all.genes.counts > count_list  &&\
 
-     	    	python3 merge_counts.py --quants count_list \
-					--out merged_counts.tsv &&\
+     	    	python3 merge_counts.py --quants count_list  \
+					--out merged_counts.tsv  &&\
 					      
 		Rscript pca.R merged_counts.tsv """
