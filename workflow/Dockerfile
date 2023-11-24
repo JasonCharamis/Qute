@@ -6,6 +6,9 @@ LABEL io.github.snakemake.conda_env_hash="e3b0c44298fc1c149afbf4c8996fb92427ae41
 
 FROM r-base:latest
 
+ENV DEBIAN_FRONTEND noninteractive
+WORKDIR /home
+
 # Add GPG keys for Debian repositories
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gnupg \
