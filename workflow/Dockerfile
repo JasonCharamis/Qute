@@ -25,10 +25,10 @@ RUN apt-get update &&\
 
 RUN conda install -c bioconda salmon
 
-# Install R dependencies
-
 # Use an official R runtime as a parent image
 FROM r-base:latest
+
+ENV R_HOME /usr/lib/R
 
 # Install required R packages
 RUN Rscript -e 'install.packages("dplyr", repos="https://cran.rstudio.com")' &&\
