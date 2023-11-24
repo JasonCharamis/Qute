@@ -5,11 +5,19 @@ LABEL io.github.snakemake.conda_env_hash="e3b0c44298fc1c149afbf4c8996fb92427ae41
 ## Dockerfile to build Docker image for this Snakemake workflow.
 
 FROM r-base:latest
-
 FROM r-base:latest
+
+# Add GPG keys for Debian repositories
+RUN apt-get install -yq --no-install-recommends \
+    gnupg \
+    dirmngr \
+    && apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 0E98404D386FA1D9 6ED0E7B82643E131 54404762BBB6E853 BDE6D2B9216EC7A8 \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Step 1: Install the essentials
 RUN apt-get update && \
+    apt-get install -y apt-utils && \
     apt-get install -yq \
         build-essential \
         libcurl4-openssl-dev \
@@ -18,11 +26,6 @@ RUN apt-get update && \
         git \
         python3-pip \
         curl
-
-#RUN apt-get install -yf
-
-# Your additional Dockerfile instructions go here
-# For example, you can install R packages or run other setup tasks
 
 # Step 2: Retrieve conda environments
 
