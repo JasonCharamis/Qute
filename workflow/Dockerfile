@@ -6,17 +6,6 @@ LABEL io.github.snakemake.conda_env_hash="e3b0c44298fc1c149afbf4c8996fb92427ae41
 
 FROM r-base:latest
 
-# Add GPG keys for Debian repositories
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    gnupg \
-    dirmngr \
-    && apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 0E98404D386FA1D9 6ED0E7B82643E131 54404762BBB6E853 BDE6D2B9216EC7A8 \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
-
-# Set the default release to buster
-RUN echo 'APT::Default-Release "buster";' > /etc/apt/apt.conf.d/default-release
-
 # Step 1: Install the essentials
 RUN apt-get update && \
     apt-get install -y apt-utils && \
