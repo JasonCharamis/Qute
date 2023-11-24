@@ -19,7 +19,7 @@ RUN apt-get update && \
         python3-pip \
         curl
 
-RUN apt-get install -yf
+#RUN apt-get install -yf
 
 # Your additional Dockerfile instructions go here
 # For example, you can install R packages or run other setup tasks
