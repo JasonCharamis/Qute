@@ -53,7 +53,6 @@ RUN conda install -c conda-forge r-essentials
 
 # Install required R packages
 RUN Rscript -e 'install.packages("dplyr", repos="https://cran.rstudio.com")' &&\
-               'install.packages("RColorBrewer2", repos="https://cran.rstudio.com")' &&\
 	       'install.packages("magrittr", repos="https://cran.rstudio.com")' &&\
 	       'install.packages("stringr", repos="https://cran.rstudio.com")' &&\
 	       'install.packages("ggplot2", repos="https://cran.rstudio.com")' && \
