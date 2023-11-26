@@ -5,8 +5,8 @@ def find_repository_name(start_dir="."):
   for root, dirs, files in os.walk(start_dir):
     paths = [path for path in files if re.search("Snakefile|snakefile", path)]
     if paths:
-      return re.sub(".\/|workflow","", root)
-
+      return print ( re.sub(".\/|workflow","", root) )
+'''
 def find_workflow_path():
   home_directory = os.path.expanduser("~")
   repository_name = find_repository_name(start_dir="~")
@@ -14,6 +14,7 @@ def find_workflow_path():
   return result.stdout
 
 print ( find_workflow_path() )
+'''
 
 configfile: re.sub("\s+","", str(find_workflow_path())+"/config/config.yaml")
 
