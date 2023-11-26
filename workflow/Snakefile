@@ -1,126 +1,83 @@
-import os, re
-import subprocess
+import os, re, subprocess
+import snakemake_utils
 
-def find_repository_name(start_dir="."):
-  for root, dirs, files in os.walk(start_dir):
-    paths = [path for path in files if re.search("Snakefile|snakefile", path)]
-    if paths:
-      return print ( re.sub(".\/|workflow","", root) )
-'''
-def find_workflow_path():
-  home_directory = os.path.expanduser("~")
-  repository_name = find_repository_name(start_dir="~")
-  result = subprocess.run(["find", home_directory, "-type", "d", "-name", repository_name ], capture_output=True, text=True)
-  return result.stdout
+configfile: re.sub("\s+", "", str(find_workflow_path(dir=".")) + "/config/config.yaml")
 
-print ( find_workflow_path() )
-'''
-
-configfile: re.sub("\s+","", str(find_workflow_path())+"/config/config.yaml")
-
-samples = { samples[:-10] for samples in os.listdir (".") if samples.endswith(".fastq.gz") }
-species = { sample[:-1] for sample in samples }
+samples = {sample[:-10] for sample in os.listdir(".") if sample.endswith(".fastq.gz")}
+species = {sample[:-1] for sample in samples}
 
 rule all:
-  input:
-    expand ( '{species}.salmon.index', species=species ),
-	expand ( '{sample}.salmon.quants', sample=samples ),
-	expand ( '{species}.all.genes.counts', species=species ),
-	"PCA.svg"
+    input:
+        expand('{species}.salmon.index', species=species),
+        expand('{sample}.salmon.quants', sample=samples),
+        expand('{species}.all.genes.counts', species=species),
+        "PCA.svg"
 
 rule index:
-   input: "{species}.fasta"
-   output: directory("{species}.salmon.index")
-   conda: "envs/salmon.yaml"
-   shell: """ salmon index -t {input} \
-   	   	 	   -i {output} \
-			   --keepDuplicates """
+    input: "{species}.fasta"
+    output: directory("{species}.salmon.index")
+    conda: "envs/salmon.yaml"
+    shell: """ salmon index -t {input} -i {output} --keepDuplicates """
 
 rule selective_alignment:
-   input: "{samples}_1.trimmed.fastq.gz", "{samples}_2.trimmed.fastq.gz"
-   output: directory ( "{samples}.salmon.quants" )
-   conda: "envs/salmon.yaml"	
-   params:
-     species = lambda wildcards: wildcards.samples[:-1],
-	 threads = config['mapping_threads']
-   shell: """ salmon quant -i {params.species}.salmon.index \
-   	   	 	   -l A \
-			   -1 {input[0]} -2 {input[1]} \
-			   --threads {params.threads} \
-			   --validateMappings \
-			   -o {output} """
+    input: "{samples}_1.trimmed.fastq.gz", "{samples}_2.trimmed.fastq.gz"
+    output: directory("{samples}.salmon.quants")
+    conda: "envs/salmon.yaml"
+    params:
+        species=lambda wildcards: wildcards.samples[:-1],
+        threads=config['mapping_threads']
+    shell: """ salmon quant -i {params.species}.salmon.index -l A -1 {input[0]} -2 {input[1]} --threads {params.threads} --validateMappings -o {output} """
 
 rule quantmerge:
-   input: expand ( "{sample}/quant.sf", sample = samples )
-   
-   output: counts="counts.mod.txt",
-   	   tpm="all.genes.tpm.tsv",
-	   samples_list="samples.list"
-	   
-   conda: "envs/salmon.yaml"
-   
-   shell: """ salmon quantmerge --quants {input} \ 
-   	  	    		 --column numreads \
-				 --output {output.counts} &&\
-		
-		salmon quantmerge --quants {input} \ 
-   	  	    		 --column TPM \
-				 --output {output.tpm} &&\
-		
-		perl counts_to_samples.pl {output.tpm} > {output.samples_list} """
+    input: expand("{sample}/quant.sf", sample=samples)
+    output:
+        counts="counts.mod.txt",
+        tpm="all.genes.tpm.tsv",
+        samples_list="samples.list"
+    conda: "envs/salmon.yaml"
+    shell: """ salmon quantmerge --quants {input} --column numreads --output {output.counts} &&
+              salmon quantmerge --quants {input} --column TPM --output {output.tpm} &&
+              perl counts_to_samples.pl {output.tpm} > {output.samples_list} """
 
-
-rule PCA: 
-   input: tpm="all.genes.tpm"
-   output: pca="PCA.svg"
-   conda: "envs/salmon.yaml"
-   params: species = lambda wildcards: wildcards.samples[:-1]
-   shell: """ Rscript pca.R {input.tpm} """
-
+rule PCA:
+    input: tpm="all.genes.tpm.tsv"
+    output: pca="PCA.svg"
+    conda: "envs/salmon.yaml"
+    params: species=lambda wildcards: wildcards.samples[:-1]
+    shell: """ Rscript pca.R {input.tpm} """
 
 rule make_directories:
-	input: counts_file="counts.mod.txt",
-	    samples_list="samples.list",
-	    pca="PCA.svg"
-	    
+    input:
+        counts_file="counts.mod.txt",
+        samples_list="samples.list",
+        pca="PCA.svg"
     output: 'chkp'
-	
-    shell: """ mkdir edgeR &&\
-	    	  cd edgeR &&\
-		  mkdir 01_run_DE_analysis &&\
-		  mkdir 02_analyze_DE &&\
-		  cd ../ &&\
-		  cp results/counts.mod.txt edgeR/01_run_DE_analysis/ &&\
-		  cp {samples_file} edgeR/01_run_DE_analysis/ &&\
-		  touch chkp """
-
+    shell: """ mkdir edgeR &&
+              cd edgeR &&
+              mkdir 01_run_DE_analysis &&
+              mkdir 02_analyze_DE &&
+              cd ../ &&
+              cp results/counts.mod.txt edgeR/01_run_DE_analysis/ &&
+              cp {samples_file} edgeR/01_run_DE_analysis/ &&
+              touch chkp """
 
 rule run_DE_analysis:
-    input: counts_file="counts.mod.txt",
-		samples_list="samples.list",
-        'chkp'
-
-    output: 'edgeR/chkp01' 
-
-    shell: """ cd edgeR/01_run_DE_analysis &&\
-	    	  perl run_DE_analysis.pl --matrix ../../../{input.counts_file} \
-		  			  --method edgeR \
-					  --samples_file ../../results/{input.samples_list} &&\
-					  cd ../ &&\
-					  touch chkp01 """
+    input:
+        counts_file="counts.mod.txt",
+        samples_list="samples.list",
+        chkp='chkp'
+    output: 'edgeR/chkp01'
+    shell: """ cd edgeR/01_run_DE_analysis &&
+              perl run_DE_analysis.pl --matrix ../../../{input.counts_file} --method edgeR --samples_file ../../results/{input.samples_list} &&
+              cd ../ &&
+              touch chkp01 """
 
 rule analyze_DE:
     input: 'edgeR/chkp01'
-
     output: 'edgeR/chkp02'
-
-    shell: """ cd edgeR/02_analyze_DE &&\
-    	       ln -s ../01_run_DE_analysis/edgeR.*/counts.mod.txt* . &&\
-
-	       perl analyze_diff_expr.pl --matrix ../../results/counts.mod.txt \ 
-	       	    			 --samples ../01_run_DE_analysis/samples.list \
-					 -P 1e-3 \
-					 -C 2 &&\
-	       cd ../ &&\
-	       touch chkp02 &&\
-	       rm ../chkp ../{input} ../{output} """
+    shell: """ cd edgeR/02_analyze_DE &&
+               ln -s ../01_run_DE_analysis/edgeR.*/counts.mod.txt* . &&
+               perl analyze_diff_expr.pl --matrix ../../results/counts.mod.txt --samples ../01_run_DE_analysis/samples.list -P 1e-3 -C 2 &&
+               cd ../ &&
+               touch chkp02 &&
+               rm ../chkp ../{input} ../{output} """

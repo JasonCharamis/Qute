@@ -9,7 +9,6 @@ FROM ubuntu:20.04
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Europe
 
-
 # Step 1: Install essential dependencies
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -68,6 +67,7 @@ RUN conda install wheel &&\
 RUN git clone https://github.com/JasonCharamis/QuteS.git &&\
     git clone https://github.com/JasonCharamis/Snakemake_utils.git
 
+ENV PYTHONPATH="$PYTHONPATH:Snakemake_utils"
 
 RUN curl -O -L https://raw.githubusercontent.com/trinityrnaseq/trinityrnaseq/master/Analysis/DifferentialExpression/run_DE_analysis.pl &&\
     curl -O -L https://raw.githubusercontent.com/trinityrnaseq/trinityrnaseq/master/Analysis/DifferentialExpression/analyze_diff_expr.pl
