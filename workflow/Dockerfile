@@ -48,8 +48,8 @@ ENV PATH /usr/lib/R/bin:$PATH
 #   dependencies:
 #       - salmon
 
-RUN conda install -c bioconda salmon
-RUN conda install -c conda-forge r-essentials
+RUN conda install -c bioconda salmon &&\
+    conda install -c conda-forge r-essentials
 
 # Install BiocManager
 RUN R -e 'install.packages("BiocManager", repos="https://cran.rstudio.com")'
@@ -65,7 +65,9 @@ RUN R -e 'install.packages(c("dplyr", "magrittr", "stringr", "ggplot2", "ggforti
 RUN conda install wheel &&\
     conda install snakemake
 
-RUN git clone https://github.com/JasonCharamis/QuteS.git
+RUN git clone https://github.com/JasonCharamis/QuteS.git &&\
+    git clone https://github.com/JasonCharamis/Snakemake_utils.git
+
 
 RUN curl -O -L https://raw.githubusercontent.com/trinityrnaseq/trinityrnaseq/master/Analysis/DifferentialExpression/run_DE_analysis.pl &&\
     curl -O -L https://raw.githubusercontent.com/trinityrnaseq/trinityrnaseq/master/Analysis/DifferentialExpression/analyze_diff_expr.pl
