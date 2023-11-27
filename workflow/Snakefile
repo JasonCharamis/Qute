@@ -32,7 +32,7 @@ def find_workflow_path(dir="."):
 if is_docker == "TRUE":
     configfile: str("/workflow/" + re.sub("\s+", "", str(find_repository_name(start_dir="."))) + "/config/config.yaml")
 else:
-    configfile: str(re.sub("\s+", "", str(find_workflow_path(start_dir="."))) + "/config/config.yaml")
+    configfile: str(re.sub("\s+", "", str(find_workflow_path(dir="."))) + "/config/config.yaml")
 
 
 samples = {sample[:-10] for sample in os.listdir(".") if sample.endswith(".fastq.gz")}
