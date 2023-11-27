@@ -1,7 +1,7 @@
 import os, re, subprocess
 import snakemake_utils
 
-configfile: re.sub("\s+", "", str(find_workflow_path(dir=".")) + "/config/config.yaml")
+configfile: re.sub("\s+", "", str(snakemake_utils.find_workflow_path(dir=".")) + "/config/config.yaml")
 
 samples = {sample[:-10] for sample in os.listdir(".") if sample.endswith(".fastq.gz")}
 species = {sample[:-1] for sample in samples}
