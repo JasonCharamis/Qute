@@ -13,7 +13,7 @@ def find_repository_name(start_dir="."):
                 if is_docker == "TRUE":  # If the Snakefile is run inside a Docker container, then there will be only one Snakefile, and therefore we can automatically identify it
                     return re.sub("/workflow/", "", os.path.relpath(root, start=start_dir))
                 else:  # If the Snakefile is not running inside a Docker container, then get the relative path of the Snakefile from pwd
-                    return os.path(root, start=start_dir)
+                    return os.path.join(root, start=start_dir)
 
         current_dir = os.path.dirname(current_dir)
 
