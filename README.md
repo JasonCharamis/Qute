@@ -1,10 +1,9 @@
 # Quantification of transcript expression using Salmon (QuteS)
 Automated Snakemake workflow for quantification of transcript expression using Salmon (QuteS) and running DE analysis using edgeR.
 
-Salmon and all other dependencies is automatically installed and downloaded through conda.
-Moreover, the pipeline is available as a Docker container.
+Salmon and all other dependencies is automatically installed through conda.
 
-To run as a Docker container, run the following commands:
+To use as a Docker container, run the following commands:
 
 1. git clone https://github.com/JasonCharamis/QuteS.git
 
