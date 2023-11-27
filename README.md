@@ -1,4 +1,4 @@
-# Quantification of transcript expression using Salmon (QuteS)
+# QuteS (Quantification of transcript expression using Salmon)
 Automated Snakemake workflow for quantification of transcript expression using Salmon (QuteS) and running DE analysis using edgeR.
 
 Salmon and all other dependencies is automatically installed through conda.
