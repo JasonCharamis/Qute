@@ -70,8 +70,10 @@ def all_pairs (x):
 de_subset = all_pairs(groups)
 
 rule all:
-     input:
-	expand ( "edgeR/02_analyze_DE/{de_subset}.P1e-3_C{log2FC_cutoff}.DE.annotated.plus_orthology.sorted.xlsx", de_subset=de_subset, log2FC_cutoff=config['log2FC_cutoff'] )
+    input:
+        expand("edgeR/02_analyze_DE/{de_subset}.P1e-3_C{log2FC_cutoff}.DE.annotated.plus_orthology.sorted.xlsx",
+               de_subset=de_subset,
+               log2FC_cutoff=config['log2FC_cutoff'])
 
 rule index:
     input: config['fasta']
