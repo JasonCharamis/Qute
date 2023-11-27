@@ -3,7 +3,17 @@ import re
 import subprocess
 
 
-is_docker = os.environ.get("DOCKER_CONTAINER") == "TRUE"
+def is_docker -> bool:
+    with open('/proc/self/cgroup', 'r') as procfile:
+    	 proclines = procfile.read()
+
+	 for prc in proclines:
+	     if re.search ("container", prc):
+	     	is_docker == TRUE
+	     else:
+		is_docker == FALSE
+
+     return is_docker
 
 def find_repository_name(start_dir="."):
     current_dir = os.path.abspath(start_dir)
