@@ -51,7 +51,6 @@ else:
 
 samples = {sample[:-10] for sample in os.listdir(".") if sample.endswith(".fastq.gz")}
 species = {sample[:-1] for sample in samples}
-genes = {fasta for fasta in os.listdir(".") if fasta.endswith((".fasta",".fa",".fna"))}
 
 import numpy as np
 import itertools
@@ -75,7 +74,7 @@ rule all:
 	"edgeR/02_analyze_DE/{de_subset}.P1e-3_C2.DE.annotated.plus_orthology.sorted.xlsx"
 
 rule index:
-    input: "{species}.fasta"
+    input: config['fasta']
     output: directory("{species}.salmon.index")
     conda: "envs/salmon.yaml"
     shell: """ salmon index -t {input} -i {output} --keepDuplicates """
@@ -86,7 +85,7 @@ rule selective_alignment:
     conda: "envs/salmon.yaml"
     params:
         threads=config['mapping_threads']
-    shell: """ salmon quant -i {genes}.salmon.index 
+    shell: """ salmon quant -i {species}.salmon.index 
     	       	      	    -l A -1 {input[0]} -2 {input[1]} 
 			    --threads {params.threads} 
 			    --validateMappings 
@@ -141,9 +140,10 @@ rule run_DE_analysis:
 rule analyze_DE:
     input: 'edgeR/chkp01'
     output: 'edgeR/chkp02'
+    params: DE_cutoff = config['log2FC_cutoff']
     shell: """ cd edgeR/02_analyze_DE &&\
                ln -s ../01_run_DE_analysis/edgeR.*/counts.mod.txt* . &&\
-               perl analyze_diff_expr.pl --matrix ../../results/counts.mod.txt --samples ../01_run_DE_analysis/samples.list -P 1e-3 -C 2 &&\
+               perl analyze_diff_expr.pl --matrix ../../results/counts.mod.txt --samples ../01_run_DE_analysis/samples.list -P 1e-3 -C {params.DE_cutoff} &&\
                cd ../ &&\
                touch chkp02 &&\
                rm ../chkp ../{input} ../{output} """

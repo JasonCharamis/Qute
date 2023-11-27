@@ -1,1 +1,5 @@
+fasta: 'path of reference fasta file with gene sequences'
+log2FC_cutoff: 2
 mapping_threads: 40
+
+
