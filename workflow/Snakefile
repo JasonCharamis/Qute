@@ -158,7 +158,7 @@ rule rename:
 
 
 rule reverse_sort:
-     input: 'edgeR/02_analyze_DE/{de_subset}.P1e-3_{log2FC_cutoff}.DE.annotated.tsv', #orthology = 'edgeR/02_analyze_DE/{de_subset}.P1e-3_{log2FC_cutoff}.DE.annotated.plus_orthology.tsv'
+     input: 'edgeR/02_analyze_DE/{de_subset}.P1e-3_{log2FC_cutoff}.DE.annotated.tsv'
      output: sorted = 'edgeR/02_analyze_DE/{de_subset}.P1e-3_{log2FC_cutoff}.DE.annotated.plus_orthology.sorted.tsv'            
      shell: """ perl reverse_sort.pl {input} > {output.sorted} """
 
