@@ -71,7 +71,7 @@ de_subset = all_pairs(groups)
 
 rule all:
     input:
-	"edgeR/02_analyze_DE/{de_subset}.P1e-3_C2.DE.annotated.plus_orthology.sorted.xlsx"
+	expand ( "edgeR/02_analyze_DE/{de_subset}.P1e-3_C{log2FC_cutoff}.DE.annotated.plus_orthology.sorted.xlsx", de_subset=de_subset, log2FC_cutoff=config['log2FC_cutoff'] )
 
 rule index:
     input: config['fasta']
@@ -98,8 +98,8 @@ rule quantmerge:
         tpm="all.genes.tpm.tsv",
         samples_list="samples.list"
     conda: "envs/salmon.yaml"
-    shell: """ salmon quantmerge --quants {input} --column numreads --output {output.counts} &&\
-               salmon quantmerge --quants {input} --column TPM --output {output.tpm} &&\
+    shell: """ salmon quantmerge --quants {input} --column numreads --output {output.counts} &&
+               salmon quantmerge --quants {input} --column TPM --output {output.tpm} &&
                perl counts_to_samples.pl {output.tpm} > {output.samples_list} """
 
 rule PCA:
@@ -115,13 +115,13 @@ rule make_directories:
         samples_list="samples.list",
         pca="PCA.svg"
     output: 'chkp'
-    shell: """ mkdir edgeR &&\
-               cd edgeR &&\
-               mkdir 01_run_DE_analysis &&\
-               mkdir 02_analyze_DE &&\
-               cd ../ &&\
-               cp results/counts.mod.txt edgeR/01_run_DE_analysis/ &&\
-               cp {samples_file} edgeR/01_run_DE_analysis/ &&\
+    shell: """ mkdir edgeR &&
+               cd edgeR &&
+               mkdir 01_run_DE_analysis &&
+               mkdir 02_analyze_DE &&
+               cd ../ &&
+               cp results/counts.mod.txt edgeR/01_run_DE_analysis/ &&
+               cp {samples_list} edgeR/01_run_DE_analysis/ &&
                touch chkp """
 
 
@@ -131,9 +131,9 @@ rule run_DE_analysis:
         samples_list="samples.list",
         chkp='chkp'
     output: 'edgeR/chkp01'
-    shell: """ cd edgeR/01_run_DE_analysis &&\
-               perl run_DE_analysis.pl --matrix ../../../{input.counts_file} --method edgeR --samples_file ../../results/{input.samples_list} &&\
-               cd ../ &&\
+    shell: """ cd edgeR/01_run_DE_analysis &&
+               perl run_DE_analysis.pl --matrix ../../../{input.counts_file} --method edgeR --samples_file ../../results/{input.samples_list} &&
+               cd ../ &&
                touch chkp01 """
 
 
@@ -141,16 +141,19 @@ rule analyze_DE:
     input: 'edgeR/chkp01'
     output: 'edgeR/chkp02'
     params: DE_cutoff = config['log2FC_cutoff']
-    shell: """ cd edgeR/02_analyze_DE &&\
-               ln -s ../01_run_DE_analysis/edgeR.*/counts.mod.txt* . &&\
-               perl analyze_diff_expr.pl --matrix ../../results/counts.mod.txt --samples ../01_run_DE_analysis/samples.list -P 1e-3 -C {params.DE_cutoff} &&\
-               cd ../ &&\
-               touch chkp02 &&\
+    shell: """ cd edgeR/02_analyze_DE &&
+               ln -s ../01_run_DE_analysis/edgeR.*/counts.mod.txt* . &&
+               perl analyze_diff_expr.pl --matrix ../../results/counts.mod.txt --samples ../01_run_DE_analysis/samples.list -P 1e-3 -C {params.DE_cutoff} &&
+               cd ../ &&
+               touch chkp02 &&
                rm ../chkp ../{input} ../{output} """
+
+
 rule rename:
     input: 'edgeR/02_analyze_DE/counts.mod.txt.{de_subset}.edgeR.DE_results.P1e-3_{log2FC_cutoff}.DE.subset'
     output: 'edgeR/02_analyze_DE/{de_subset}.P1e-3_C{log2FC_cutoff}.DE.subset'
     shell: " perl rename.pl {input} "
+
 
 rule reverse_sort:
      input: 'edgeR/02_analyze_DE/{de_subset}.P1e-3_{log2FC_cutoff}.DE.annotated.tsv', #orthology = 'edgeR/02_analyze_DE/{de_subset}.P1e-3_{log2FC_cutoff}.DE.annotated.plus_orthology.tsv'
