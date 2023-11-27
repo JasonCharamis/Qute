@@ -78,4 +78,5 @@ ENV PATH="~/.local:$PATH"
 ENV PATH="QuteS:$PATH"
 ENV PATH="QuteS/workflow/scripts:$PATH"
 
-CMD ["Everything installed!"]
+CMD echo "Everything installed!"
+
