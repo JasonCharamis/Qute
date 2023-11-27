@@ -2,8 +2,10 @@ import os
 import re
 import subprocess
 
+
+is_docker = os.environ.get("DOCKER_CONTAINER") == "TRUE"
+
 def find_repository_name(start_dir="."):
-    is_docker = os.environ.get("DOCKER_CONTAINER") == "TRUE"
     current_dir = os.path.abspath(start_dir)
 
     while current_dir != '/':  # Stop searching at the root directory
@@ -20,7 +22,18 @@ def find_repository_name(start_dir="."):
     # Of course, if a different path is provided with the --snakefile argument, this will be used by Snakemake
     return None  # Return None if no Snakefile or snakefile is found
 
-configfile: str("/workflow/" + re.sub("\s+", "", str(find_repository_name(start_dir="."))) + "/config/config.yaml")
+def find_workflow_path(dir="."):
+    home_directory = os.path.expanduser("~")
+    repository_name = find_repository_name(dir)
+    result = subprocess.run(["find", home_directory, "-type", "d", "-name", repository_name], capture_output=True, text=True)
+    return result.stdout
+
+
+if is_docker == "TRUE":
+    configfile: str("/workflow/" + re.sub("\s+", "", str(find_repository_name(start_dir="."))) + "/config/config.yaml")
+else:
+    configfile: str(re.sub("\s+", "", str(find_workflow_path(start_dir="."))) + "/config/config.yaml")
+
 
 samples = {sample[:-10] for sample in os.listdir(".") if sample.endswith(".fastq.gz")}
 species = {sample[:-1] for sample in samples}
