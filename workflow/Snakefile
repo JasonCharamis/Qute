@@ -1,8 +1,9 @@
 import os
 import re
 import subprocess
+import itertools
 
-###=============================================================== Snakemake Utils Functions =====================================================================###
+##=============================================================== Snakemake Utils Functions =====================================================================###
 
 def is_docker() -> bool:
     with open('/proc/self/cgroup', 'r') as procfile:
@@ -20,13 +21,16 @@ def find_repository_name(start_dir="."):
     current_dir = os.path.abspath(start_dir)
 
     while current_dir != '/':  # Stop searching at the root directory
-        for root, dirs, files in os.walk(current_dir):
-            paths = [path for path in files if re.search("Snakefile|snakefile", path)]
-            if paths:
-                if is_docker == "TRUE":  # If the Snakefile is run inside a Docker container, then there will be only one Snakefile, and therefore we can automatically identify it
-                    return re.sub("/workflow/|\.", "", os.path.relpath(root, start_dir))
-                else:  # If the Snakefile is not running inside a Docker container, then get the relative path of the Snakefile from pwd
-                    return re.sub("/workflow/|\.", "", os.path.join(root, start_dir) )
+        result = subprocess.run(["find", current_dir, "-type", "f", "-name", "Snakefile"], capture_output=True, text=True)
+
+        if result.stdout:
+            snakefiles = result.stdout.strip().split('\n')
+            if len(snakefiles) == 1:
+                return snakefiles[0]
+            else:
+                print("Multiple repositories identified:")
+                for snakefile in snakefiles:
+                    print(f"- {snakefile}")
 
         current_dir = os.path.dirname(current_dir)
 
@@ -43,21 +47,17 @@ def find_workflow_path(dir="."):
 
 ###=============================================================== Snakemake Pipeline =========================================================================###
 
-if is_docker() == True:
-    configfile: str("/workflow/" + re.sub("\s+", "", str(find_repository_name(start_dir="."))) + "/config/config.yaml")
+if is_docker():
+     configfile: str( re.sub ("workflow.*","", find_repository_name(start_dir=".")) ) + "/config/config.yaml"
 else:
-    configfile: str(re.sub("\s+", "", str(find_workflow_path(dir="."))) + "/config/config.yaml")
-
+     configfile: str( find_workflow_path(dir=".")) + "config/config.yaml"
 
 samples = {sample[:-10] for sample in os.listdir(".") if sample.endswith(".fastq.gz")}
 species = {sample[:-1] for sample in samples}
 
-import numpy as np
-import itertools
-
 ## create comparisons based on sample names ##
 groups = [re.sub("\d+$|_\d+$","",i) for i in samples]
-groups = np.unique(groups)
+groups = list(set(groups))
 
 def all_pairs (x):
     samp = (s for s in x)
