@@ -3,56 +3,9 @@ import re
 import subprocess
 import itertools
 
-##=============================================================== Snakemake Utils Functions =====================================================================###
+data_dir = config['data_dir']
 
-def is_docker() -> bool:
-    with open('/proc/self/cgroup', 'r') as procfile:
-        result = subprocess.run(["grep", "container"], stdin=procfile, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
-        if result.returncode == 0:
-            return True
-        else:
-            return False
-
-    return False
-
-
-def find_repository_name(start_dir="."):
-    current_dir = os.path.abspath(start_dir)
-
-    while current_dir != '/':  # Stop searching at the root directory
-        result = subprocess.run(["find", current_dir, "-type", "f", "-name", "Snakefile"], capture_output=True, text=True)
-
-        if result.stdout:
-            snakefiles = result.stdout.strip().split('\n')
-            if len(snakefiles) == 1:
-                return snakefiles[0]
-            else:
-                print("Multiple repositories identified:")
-                for snakefile in snakefiles:
-                    print(f"- {snakefile}")
-
-        current_dir = os.path.dirname(current_dir)
-
-    # Of course, if a different path is provided with the --snakefile argument, this will be used by Snakemake
-    return None  # Return None if no Snakefile or snakefile is found
-
-
-def find_workflow_path(dir="."):
-    home_directory = os.path.expanduser("~")
-    repository_name = find_repository_name(dir)
-    result = subprocess.run(["find", home_directory, "-type", "d", "-name", repository_name], capture_output=True, text=True)
-    return result.stdout
-
-
-###=============================================================== Snakemake Pipeline =========================================================================###
-
-if is_docker():
-     configfile: str( re.sub ("workflow.*","", find_repository_name(start_dir=".")) ) + "/config/config.yaml"
-else:
-     configfile: str( find_workflow_path(dir=".")) + "config/config.yaml"
-
-samples = {sample[:-10] for sample in os.listdir(".") if sample.endswith(".fastq.gz")}
+samples = {sample[:-10] for sample in os.listdir(data_dir) if sample.endswith(".fastq.gz")}
 species = {sample[:-1] for sample in samples}
 
 ## create comparisons based on sample names ##
@@ -69,6 +22,7 @@ def all_pairs (x):
 
 de_subset = all_pairs(groups)
 
+
 rule all:
     input:
         expand("edgeR/02_analyze_DE/{de_subset}.P1e-3_C{log2FC_cutoff}.DE.annotated.plus_orthology.sorted.xlsx",
@@ -81,6 +35,7 @@ rule index:
     conda: "envs/salmon.yaml"
     shell: """ salmon index -t {input} -i {output} --keepDuplicates """
 
+    
 rule selective_alignment:
     input: "{samples}_1.trimmed.fastq.gz", "{samples}_2.trimmed.fastq.gz"
     output: directory("{samples}.salmon.quants")
@@ -102,7 +57,7 @@ rule quantmerge:
     conda: "envs/salmon.yaml"
     shell: """ salmon quantmerge --quants {input} --column numreads --output {output.counts} &&
                salmon quantmerge --quants {input} --column TPM --output {output.tpm} &&
-               perl counts_to_samples.pl {output.tpm} > {output.samples_list} """
+               perl scripts/counts_to_samples.pl {output.tpm} > {output.samples_list} """
 
 rule PCA:
     input: tpm="all.genes.tpm.tsv"
@@ -134,7 +89,7 @@ rule run_DE_analysis:
         chkp='chkp'
     output: 'edgeR/chkp01'
     shell: """ cd edgeR/01_run_DE_analysis &&
-               perl run_DE_analysis.pl --matrix ../../../{input.counts_file} --method edgeR --samples_file ../../results/{input.samples_list} &&
+               perl scripts/run_DE_analysis.pl --matrix ../../../{input.counts_file} --method edgeR --samples_file ../../results/{input.samples_list} &&
                cd ../ &&
                touch chkp01 """
 
@@ -145,7 +100,7 @@ rule analyze_DE:
     params: DE_cutoff = config['log2FC_cutoff']
     shell: """ cd edgeR/02_analyze_DE &&
                ln -s ../01_run_DE_analysis/edgeR.*/counts.mod.txt* . &&
-               perl analyze_diff_expr.pl --matrix ../../results/counts.mod.txt --samples ../01_run_DE_analysis/samples.list -P 1e-3 -C {params.DE_cutoff} &&
+               perl scripts/analyze_diff_expr.pl --matrix ../../results/counts.mod.txt --samples ../01_run_DE_analysis/samples.list -P 1e-3 -C {params.DE_cutoff} &&
                cd ../ &&
                touch chkp02 &&
                rm ../chkp ../{input} ../{output} """
@@ -154,16 +109,16 @@ rule analyze_DE:
 rule rename:
     input: 'edgeR/02_analyze_DE/counts.mod.txt.{de_subset}.edgeR.DE_results.P1e-3_{log2FC_cutoff}.DE.subset'
     output: 'edgeR/02_analyze_DE/{de_subset}.P1e-3_C{log2FC_cutoff}.DE.subset'
-    shell: " perl rename.pl {input} "
+    shell: " perl scripts/rename.pl {input} "
 
 
 rule reverse_sort:
      input: 'edgeR/02_analyze_DE/{de_subset}.P1e-3_{log2FC_cutoff}.DE.annotated.tsv'
      output: sorted = 'edgeR/02_analyze_DE/{de_subset}.P1e-3_{log2FC_cutoff}.DE.annotated.plus_orthology.sorted.tsv'            
-     shell: """ perl reverse_sort.pl {input} > {output.sorted} """
+     shell: """ perl scripts/reverse_sort.pl {input} > {output.sorted} """
 
 
 rule tsv2xlsx:
      input: 'edgeR/02_analyze_DE/{de_subset}.P1e-3_{log2FC_cutoff}.DE.annotated.plus_orthology.sorted.tsv'
      output: 'edgeR/02_analyze_DE/{de_subset}.P1e-3_{log2FC_cutoff}.DE.annotated.plus_orthology.sorted.xlsx'
-     shell: """ python3 tsv2xlsx.py {input} """
+     shell: """ python3 scripts/tsv2xlsx.py {input} """
