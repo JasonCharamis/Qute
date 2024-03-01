@@ -8,7 +8,7 @@ To use as a Docker container, run the following commands:
 1. git clone https://github.com/JasonCharamis/QuteS.git
 2. cd QuteS/workflow/ && sudo docker build -t automated_transcript_quantification_using_salmon:latest .
 3. Travel to the directory where your data live
-4. sudo docker run -it -v $(pwd):/workflow -w /workflow automated_transcript_quantification_using_salmon:latest snakemake --cores 20 --use-conda --snakefile Snakefile
+4. sudo docker run -it -v $(pwd):/mnt/workdir -w /mnt/workdir automated_salmon_rnaseq_analysis:latest snakemake --snakefile QuteS/workflow/Snakefile --cores 1 --use-conda --conda-frontend mamba
 
 Of course, to customize the run edit the config/config.yaml file. 
 That's it! The pipeline will run automatically.
