@@ -5,8 +5,7 @@ import itertools
 
 data_dir = config['data_dir']
 
-samples = {sample[:-10] for sample in os.listdir(data_dir) if sample.endswith(".fastq.gz")}
-species = {sample[:-1] for sample in samples}
+samples = config['samples']
 
 ## create comparisons based on sample names ##
 groups = [re.sub("\d+$|_\d+$","",i) for i in samples]
