@@ -16,7 +16,7 @@ with open(samples_file) as f:
         columns = line.strip().split("\t")
 
         if len(columns) != 4:
-            raise ValueError("Invalid sample list format. Sample list should be of format: group_name\tsample_name\tfastq_filename")
+            raise ValueError("Invalid sample list format. Sample list should be of format: group_name\tsample_name\tfastq_filename1\tfastq_filename2")
         
         group = columns[0]
         sample = columns[1]
