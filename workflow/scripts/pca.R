@@ -17,6 +17,7 @@ f_counts <- args
 
 ## open file from stdin ##
 tpm <- read.table(args[1], header=TRUE)
+samples_list <- read.table(args[2], header=TRUE, sep="\t")
 
 ## make first column as rownames ##
 rownames(tpm) <- tpm[,1]
@@ -45,7 +46,7 @@ xt = t(logtpms)
 
 ## generate sample names for grouping replicates ##
 xt <- as.data.frame(xt)
-groups <- str_replace(rownames(xt), "\\d$", "")
+groups <- samples_list$V1 # get group column
 
 ## add column with sample name to group replicates ##
 xtl <- xt %>% add_column(Sample = groups)

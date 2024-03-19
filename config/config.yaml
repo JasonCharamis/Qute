@@ -1,6 +1,6 @@
 
-data_dir: '/path/to/fastq/files'
-fasta: 'path of reference fasta file with gene sequences'
+samples_file: 'samples file with four tab-separated columns: Group, Sample, Fastq_Filename1, Fastq_Filename2'
+fasta: 'path of reference fasta file to index'
 log2FC_cutoff: 2
 mapping_threads: 40
 
