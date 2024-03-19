@@ -47,8 +47,8 @@ def all_pairs (groups):
 
 de_subset = all_pairs(group_names)
 
-print(de_subset)
 
+## ====================================================== ANALYSIS ====================================================== ##
 
 rule all:
     input:
