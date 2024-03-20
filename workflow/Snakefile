@@ -35,7 +35,7 @@ with open(samples_file) as f:
 
 # Extract unique group and sample names
 group_names = list(set(sample_info['group'] for sample_info in samples_dict.values()))
-samples = list(sample_info for sample_info in samples_dict.keys())
+samples = [sample_info for sample_info in samples_dict.keys()]
 
 ## create comparisons based on sample names ##
 def all_pairs (groups):
