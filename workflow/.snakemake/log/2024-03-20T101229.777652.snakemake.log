@@ -1,0 +1,3 @@
+FileNotFoundError in file /home/jason/bin/QuteS/workflow/Snakefile, line 11:
+[Errno 2] No such file or directory: 'samples file with four tab-separated columns: Group, Sample, Fastq_Filename1, Fastq_Filename2'
+  File "/home/jason/bin/QuteS/workflow/Snakefile", line 11, in <module>
