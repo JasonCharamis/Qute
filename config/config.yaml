@@ -1,7 +1,11 @@
 
-samples_file: 'samples file with four tab-separated columns: Group, Sample, Fastq_Filename1, Fastq_Filename2'
-fasta: 'path of reference fasta file to index'
+# Declaration file has the following structure
+# Group_Name	Sample_Name	Fastq_File1	Fastq_File2  Fasta_Index_File
+# Group1        Sample1        fastq1_1.fastq.gz fastq1_2.fastq.gz   index1
+
+declaration_file: 'Path of declaration file'
 log2FC_cutoff: 2
 mapping_threads: 40
+
 
 
