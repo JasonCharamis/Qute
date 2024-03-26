@@ -2,37 +2,55 @@ import os
 import re
 import subprocess
 
-control_file = config['control_file']
-samples_dict = {}
+
+# Get the absolute workflow path
+def get_workflow_path(start_dir="."):
+    result = subprocess.run(["find", start_dir, "-name", "Snakefile*"], stdout=subprocess.PIPE, stderr=subprocess.PIPE) # Locate workflow_dir using Snakefile
+    stdout_str = result.stdout.decode("utf-8").strip() # Decode stdout into a string
+    
+    if not stdout_str:
+        return None
+    workflow_dir = re.sub(r"/workflow/.*", "", stdout_str)
+    return os.path.abspath(workflow_dir)
 
 
-with open(control_file) as f:
-    first_line = True
+# Parse control file
+def parse_control_file ( control_file ):
+    with open(control_file) as f:
+        first_line = True
 
-    for line in f:
-        if first_line: # Skip header line
-            continue
-        
+        # Skip header line
+        for line in f:
+            if first_line:
+                continue
+
         columns = line.strip().split("\t")
 
         if len(columns) != 5:
             raise ValueError("Invalid sample list format. Sample list should be of format: group_name\tsample_name\tfastq_filename1\tfastq_filename2\tindex_filename")
-        
+
         group = columns[0]
         sample = columns[1]
         filename1 = columns[2]
         filename2 = columns[3]
         index = columns[4]
-
-        # Check if sample name already exists in the dictionary, if not, add it
+        
         if sample not in samples_dict:
             samples_dict[sample] = {'group': group, 'filename1': filename1, 'filename2': filename2, 'index': index}
-
+            
             with open ( 'samples.list', "w" ) as file: # Write sample.list file
                 print ( f"{sample}\t{group}", file=file )
         else:
             pass
-                
+
+        return ( sample_dict )
+
+    
+# ====================================================== VALUE PREPARATION =========================================== #
+
+workflow_dir = get_workflow_path()
+configfile: f'{workflow_dir}/config/config.yaml'
+scripts = os.path.join(workflow_dir, "workflow/scripts")
 
 # Create wildcards for group, sample names and index files
 groups = list(set(sample_info['group'] for sample_info in samples_dict.values()))
@@ -48,8 +66,7 @@ def all_pairs (groups):
 
     return list(comparisons.values())                   
 
-
-de_subsets = all_pairs(group_names)
+de_subsets = all_pairs(groups)
 log2FC_cutoff = config['log2FC_cutoff']
 
 
@@ -105,7 +122,7 @@ rule PCA:
            samples_list = "samples.list"
     output: pca="PCA.svg"
     conda: "envs/salmon.yaml"
-    shell: """ Rscript scripts/pca.R {input.tpm} {input.samples_list} """
+    shell: """ Rscript {scripts}/pca.R {input.tpm} {input.samples_list} """
     
     
 rule make_directories:
@@ -130,7 +147,7 @@ rule run_DE_analysis:
         chkp='chkp'
     output: 'edgeR/chkp01'
     shell: """ cd edgeR/01_run_DE_analysis && \
-               perl scripts/run_DE_analysis.pl --matrix ../../../{input.counts_file} --method edgeR --samples_file ../../results/{input.samples_list} && \
+               perl {scripts}/run_DE_analysis.pl --matrix ../../../{input.counts_file} --method edgeR --samples_file ../../results/{input.samples_list} && \
                cd ../ && \
                touch chkp01 """
 
@@ -140,7 +157,7 @@ rule analyze_DE:
     params: DE_cutoff = config['log2FC_cutoff']
     shell: """ cd edgeR/02_analyze_DE && \
                ln -s ../01_run_DE_analysis/edgeR.*/counts.mod.txt* . && \
-               perl scripts/analyze_diff_expr.pl --matrix ../../results/counts.mod.txt --samples ../01_run_DE_analysis/samples.list -P 1e-3 -C {params.DE_cutoff} && \
+               perl {scripts}/analyze_diff_expr.pl --matrix ../../results/counts.mod.txt --samples ../01_run_DE_analysis/samples.list -P 1e-3 -C {params.DE_cutoff} && \
                cd ../ && \
                touch chkp02 && \
                rm ../chkp ../{input} ../{output} """
@@ -148,16 +165,16 @@ rule analyze_DE:
 rule rename:
     input: 'edgeR/02_analyze_DE/counts.mod.txt.{de_subsets}.edgeR.DE_results.P1e-3_{log2FC_cutoff}.DE.subset'
     output: 'edgeR/02_analyze_DE/{de_subsets}.P1e-3_C{log2FC_cutoff}.DE.subset'
-    shell: " perl scripts/rename.pl {input} "
+    shell: " perl {scripts}/rename.pl {input} "
     
     
 rule reverse_sort:
      input: 'edgeR/02_analyze_DE/{de_subsets}.P1e-3_{log2FC_cutoff}.DE.tsv'
      output: sorted = 'edgeR/02_analyze_DE/{de_subsets}.P1e-3_{log2FC_cutoff}.DE.tsv'            
-     shell: """ perl scripts/reverse_sort.pl {input} > {output.sorted} """
+     shell: """ perl {scripts}/reverse_sort.pl {input} > {output.sorted} """
 
      
 rule tsv2xlsx:
      input: 'edgeR/02_analyze_DE/{de_subsets}.P1e-3_{log2FC_cutoff}.DE.tsv'
      output: 'edgeR/02_analyze_DE/{de_subsets}.P1e-3_{log2FC_cutoff}.DE.xlsx'
-     shell: """ python3 scripts/tsv2xlsx.py {input} """
+     shell: """ python3 {scripts}/tsv2xlsx.py {input} """
