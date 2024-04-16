@@ -52,6 +52,10 @@ workflow_dir = get_workflow_path()
 configfile: f'{workflow_dir}/config/config.yaml'
 scripts = os.path.join(workflow_dir, "workflow/scripts")
 
+control_file = config['control_file']
+samples_dict = parse_control_file ( control_file )
+
+
 # Create wildcards for group, sample names and index files
 groups = list(set(sample_info['group'] for sample_info in samples_dict.values()))
 samples = [sample_info for sample_info in samples_dict.keys()]
